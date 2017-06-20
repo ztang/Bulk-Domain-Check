@@ -11,6 +11,8 @@ import sys
 import string
 import itertools
 import socket
+import threading
+from timeout import time_out
 
 class WhoisCheck():
     def __init__(self):
@@ -29,6 +31,7 @@ class WhoisCheck():
         print ' - AAA.org means all 3-character(both number of letter) .org domains'
         print 'After input the domain rules, the script will generate and check all domains'
         print 'that match the rules'
+        print 'use \'-f file_name\' option to read domain list from file'
         print 'This script support all tlds that has whois server.'
         print 'Have fun!'
 
@@ -94,13 +97,31 @@ class WhoisCheck():
         except socket.error:
             return False
 
-    def check_available(self, dn):
-        if self.check_ping(dn) == True:
-            return True
-        elif self.check_whois(dn) == True:
-            return True
-        else:
+    '''
+    def timeout(self, func, args):
+        p = threading.Thread(target=func, args=[args])
+        p.setDaemon(True)
+        p.start()
+        p.join(1)
+        if p.is_alive():
+            print 'timeout'
             return False
+    '''
+
+    def check_available(self, dn):
+        # if time out, we think it false
+        if time_out(self.check_ping, dn) == False:
+            # when time out, check whois
+            if self.check_whois(dn) == True:
+                return True
+            else:
+                return False
+        # if not time out, get ping result
+        else:
+            if self.check_ping(dn) == True:
+                return True
+            else:
+                return False
 
     def check_available_new(self, dn):
         try:
@@ -116,7 +137,7 @@ class WhoisCheck():
     def check_all(self, dn_list):
         for dn in dn_list:
             #result = self.check_available_new(dn)
-            result = self.check_whois(dn)
+            result = self.check_available(dn)
             if result == True:
                 print 'The domain %s has been registered!' %dn
             else:
@@ -128,26 +149,32 @@ if __name__ == '__main__':
 
     wc = WhoisCheck()
 
-    #print wc.check_available_new('01.com')
-    #print wc.check_available_new('02.com')
-    #print wc.check_available_new('03.com')
-    #print wc.check_available_new('04.com')
-    #print wc.check_available_new('05.com')
-    #print wc.check_available_new('06.com')
-    #sys.exit(0)
-
     # print sys.argv
     # sys.exit(0)
     if len(sys.argv) == 2:
-        if sys.argv[1] == '-h' or sys.argv[1] == 'help':
+        if sys.argv[1] == '-h' or sys.argv[1] == '--help':
             wc._help()
             sys.exit(0)
         else:
             print 'Wrong input, please use -h for help'
             sys.exit(0)
 
-    dn_rule = raw_input('Please input domain name rule:')
-    dn_list = wc.generate_list(dn_rule)
+    elif len(sys.argv) == 3:
+        if sys.argv[1] == '-f' or sys.argv[1] == '--file':
+            file_name = sys.argv[2]
+            dn_list = wc.get_list(file_name)
+        else:
+            print 'Wrong input, please use -h for help'
+            sys.exit(0)
+
+    elif len(sys.argv) >= 4:
+        print 'Wrong input, please use -h for help'
+        sys.exit(0)
+
+    else:
+        dn_rule = raw_input('Please input domain name rule:')
+        dn_list = wc.generate_list(dn_rule)
+
     wc.check_all(dn_list)
     print 'All domain available:'
     for ava_dn in wc.ava_list:

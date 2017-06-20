@@ -8,6 +8,10 @@ Check domains:
 
     python check.py
 
+Check domains with domain list from file:
+
+    python check.py -f file_name
+
 Help Info:
 
     python check.py -h
@@ -43,12 +47,23 @@ And whois tool from Ubuntu:
 
     sudo apt install whois
 
-## TODO
-
- - Use `ping` result to check if domain is available
- - Set timeout for `socket.gethostbyname`
- - Add the option for reading domain rules from txt
-
 ## Contact
 
 mail@ztang.com
+
+## Change Log
+
+### [v1] - 2017-06-20
+
+#### Added
+
+ - time_out function
+ - read domain list from file
+ 
+#### Changed
+
+ - check_available function
+ 
+### [v0.1] - 2017-06-20
+
+ - First version
