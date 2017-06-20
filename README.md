@@ -1,4 +1,4 @@
-# Domain Bulk Check
+# Bulk Domain Check
 
 Check bulk domain availability.
 
@@ -47,6 +47,7 @@ And whois tool from Ubuntu:
 
  - Use `ping` result to check if domain is available
  - Set timeout for `socket.gethostbyname`
+ - Add the option for reading domain rules from txt
 
 ## Contact
 
